@@ -1,75 +1,52 @@
 import { Router } from "express";
 import { z } from "zod";
-import { requireRole } from "../auth/session";
-import { prisma, type Prisma } from "../db/prisma";
-import { audit } from "../lib/audit";
-import { conflict, notFound } from "../lib/errors";
-import { idParam, isoDate, pageQuery, paged } from "../lib/http";
-import { toDateOnly } from "../lib/dates";
-import { scheduleRefresh } from "../analytics/warehouse";
-import { publish } from "../realtime/hub";
+import { prisma, type InvoiceStatus } from "../db/prisma";
+import { logAccess } from "../lib/access-log";
+import { HttpError, notFound, param } from "../lib/http";
 
-const router = Router();
-router.use(requireRole("ACCOUNTING", "MANAGER"));
+export const invoicesRouter = Router();
 
 const include = {
-  customer: { select: { id: true, number: true, name: true } },
-  company: { select: { id: true, code: true, name: true } },
-} satisfies Prisma.InvoiceInclude;
+  patient: { select: { id: true, mrn: true, firstName: true, lastName: true, insuranceProvider: true } },
+  lines: true,
+} as const;
 
-const today = () => toDateOnly(new Date().toISOString().slice(0, 10));
-
-router.get("/", async (req, res) => {
-  const f = pageQuery
-    .extend({ status: z.enum(["OPEN", "OVERDUE", "PAID", "CANCELLED", "DRAFT"]).optional(), company: z.string().optional(), q: z.string().trim().max(80).optional() })
-    .parse(req.query);
-  const where: Prisma.InvoiceWhereInput = {
-    ...(f.status === "OVERDUE" ? { status: "OPEN", dueDate: { lt: today() } } : f.status ? { status: f.status } : {}),
-    ...(f.company ? { company: { code: f.company } } : {}),
-    ...(f.q ? { OR: [{ number: { contains: f.q, mode: "insensitive" } }, { customer: { name: { contains: f.q, mode: "insensitive" } } }] } : {}),
-  };
-  const orderBy: Prisma.InvoiceOrderByWithRelationInput = f.status === "OVERDUE" || f.status === "OPEN" ? { dueDate: "asc" } : { issueDate: "desc" };
-  const [items, total] = await Promise.all([
-    prisma().invoice.findMany({ where, include, orderBy, skip: (f.page - 1) * f.pageSize, take: f.pageSize }),
-    prisma().invoice.count({ where }),
-  ]);
-  res.json(paged(items, total, f.page, f.pageSize));
+invoicesRouter.get("/", async (req, res) => {
+  const status = req.query.status ? (String(req.query.status) as InvoiceStatus) : undefined;
+  const invoices = await prisma().invoice.findMany({ where: { status }, orderBy: { createdAt: "desc" }, take: 300, include });
+  res.json(invoices);
 });
 
-/** Receivables aging: open invoice amounts bucketed by days past due. */
-router.get("/aging", async (req, res) => {
-  const { company } = z.object({ company: z.string().optional() }).parse(req.query);
-  const rows = await prisma().$queryRaw<{ bucket: string; amount: bigint; count: bigint }[]>`
-    SELECT CASE
-             WHEN i."dueDate" >= current_date THEN 'current'
-             WHEN current_date - i."dueDate" <= 30 THEN '1-30'
-             WHEN current_date - i."dueDate" <= 60 THEN '31-60'
-             WHEN current_date - i."dueDate" <= 90 THEN '61-90'
-             ELSE '90+'
-           END AS bucket,
-           sum(i."amountCents") AS amount, count(*) AS count
-    FROM "Invoice" i JOIN "Company" c ON c.id = i."companyId"
-    WHERE i.status = 'OPEN' AND (${company ?? null}::text IS NULL OR c.code = ${company ?? null})
-    GROUP BY 1`;
-  const order = ["current", "1-30", "31-60", "61-90", "90+"];
-  res.json({
-    buckets: order.map((b) => {
-      const r = rows.find((x) => x.bucket === b);
-      return { bucket: b, amountCents: Number(r?.amount ?? 0), count: Number(r?.count ?? 0) };
-    }),
-  });
-});
-
-router.post("/:id/mark-paid", requireRole("ACCOUNTING"), async (req, res) => {
-  const id = idParam.parse(req.params.id);
-  const { paidAt } = z.object({ paidAt: isoDate.optional() }).parse(req.body ?? {});
-  const invoice = await prisma().invoice.findUnique({ where: { id } });
+invoicesRouter.put("/:id/lines", async (req, res) => {
+  const lines = z
+    .array(z.object({ description: z.string().trim().min(1), quantity: z.coerce.number().int().min(1), unitPriceCents: z.coerce.number().int().min(0) }))
+    .min(1)
+    .parse(req.body);
+  const invoice = await prisma().invoice.findUnique({ where: { id: param(req, "id") } });
   if (!invoice) throw notFound("Invoice");
-  if (invoice.status !== "OPEN") throw conflict(`Only open invoices can be marked as paid (this one is ${invoice.status.toLowerCase()})`);
-  const updated = await prisma().invoice.update({ where: { id }, data: { status: "PAID", paidAt: paidAt ? toDateOnly(paidAt) : today() }, include });
-  await audit(req, { action: "invoice.paid", entityType: "invoice", entityId: id });
-  scheduleRefresh(() => publish({ all: true }, { type: "kpis.changed" }));
-  res.json({ invoice: updated });
+  if (invoice.status !== "DRAFT") throw new HttpError(409, "Only draft invoices can be edited");
+  const updated = await prisma().invoice.update({
+    where: { id: invoice.id },
+    data: { lines: { deleteMany: {}, create: lines } },
+    include,
+  });
+  logAccess(req, "edit-lines", "invoice", invoice.id, invoice.number);
+  res.json(updated);
 });
 
-export default router;
+const next: Record<InvoiceStatus, InvoiceStatus[]> = { DRAFT: ["ISSUED", "VOID"], ISSUED: ["PAID", "VOID"], PAID: [], VOID: [] };
+
+invoicesRouter.patch("/:id/status", async (req, res) => {
+  const { status } = z.object({ status: z.enum(["ISSUED", "PAID", "VOID"]) }).parse(req.body);
+  const invoice = await prisma().invoice.findUnique({ where: { id: param(req, "id") } });
+  if (!invoice) throw notFound("Invoice");
+  if (!next[invoice.status].includes(status)) throw new HttpError(409, `Cannot change an invoice from ${invoice.status} to ${status}`);
+  const now = new Date();
+  const updated = await prisma().invoice.update({
+    where: { id: invoice.id },
+    data: { status, issuedAt: status === "ISSUED" ? now : undefined, paidAt: status === "PAID" ? now : undefined },
+    include,
+  });
+  logAccess(req, `status:${status}`, "invoice", invoice.id, invoice.number);
+  res.json(updated);
+});

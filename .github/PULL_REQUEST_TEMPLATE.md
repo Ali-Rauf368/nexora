@@ -1,23 +1,16 @@
 ## What and why
 
-<!-- What changes for the colleagues using Nexora, and why. Link the issue. -->
+<!-- What changes for clinic staff, and why. Link the issue. -->
 
 ## How it was tested
 
-- [ ] Unit / API tests
-- [ ] Component tests
-- [ ] End-to-end (Playwright) incl. accessibility check
-- [ ] Tried manually with demo accounts: <!-- which roles? -->
+- [ ] `npm run lint && npm run typecheck`
+- [ ] Tried manually with demo accounts: <!-- reception / doctor / admin? -->
 
-## Data protection (GDPR)
+## Patient data
 
-- [ ] No new personal data, **or** documented in `docs/gdpr.md` (purpose, legal basis, who sees it, retention)
-- [ ] Access to personal data is role-checked on the server and audited
+- [ ] No new patient data, **or** it is role-checked on the server and written to the access log
 
 ## Deployment notes
 
-<!-- Migrations, new env vars, NiFi flow changes, coordination with IT. "None" is a fine answer. -->
-
-## Screenshots
-
-<!-- For UI changes: before/after, light and dark. -->
+<!-- Migrations, new env vars. "None" is a fine answer. -->

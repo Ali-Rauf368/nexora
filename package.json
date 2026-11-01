@@ -1,11 +1,10 @@
 {
   "name": "nexora",
   "private": true,
-  "description": "Nexora – internal operations platform of the Rheinwerk Gruppe",
+  "description": "Nexora Clinic \u2013 patient, appointment and billing management for outpatient clinics",
   "workspaces": [
     "apps/api",
-    "apps/web",
-    "e2e"
+    "apps/web"
   ],
   "engines": {
     "node": ">=24"
@@ -18,18 +17,14 @@
     "stop:services": "bash scripts/dev-services.sh stop",
     "db:migrate": "npm -w apps/api run db:migrate",
     "db:seed": "npm -w apps/api run db:seed",
-    "analytics:refresh": "npm -w apps/api run analytics:refresh",
     "build": "npm -w apps/api run build && npm -w apps/web run build",
-    "typecheck": "npm -w apps/api run typecheck && npm -w apps/web run typecheck && npm -w e2e run typecheck",
-    "lint": "eslint .",
-    "test": "npm -w apps/api test && npm -w apps/web test",
-    "test:e2e": "npm -w e2e test"
+    "typecheck": "npm -w apps/api run typecheck && npm -w apps/web run typecheck",
+    "lint": "eslint ."
   },
   "allowScripts": {
     "esbuild@0.28.2": true,
     "prisma@7.10.1": true,
     "@prisma/engines@7.10.1": true,
-    "@swc/core@1.16.21": true,
     "@parcel/watcher@2.6.0": true,
     "@scarf/scarf": false,
     "mongodb-memory-server": false

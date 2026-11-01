@@ -1,57 +1,48 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { api } from "./api";
-import type { Role, SessionUser } from "./types";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { api, type User } from "./api";
 
-interface Auth {
-  user: SessionUser | null;
-  ready: boolean;
-  login: (username: string, password: string) => Promise<void>;
-  signup: (data: { username: string; displayName: string; email: string; password: string }) => Promise<void>;
+interface AuthState {
+  user: User | null | undefined;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  /** True for admins or anyone holding one of the roles. */
-  can: (...roles: Role[]) => boolean;
 }
 
-const AuthContext = createContext<Auth | null>(null);
+const AuthContext = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<SessionUser | null>(null);
-  const [ready, setReady] = useState(false);
+  const [user, setUser] = useState<User | null>();
 
   useEffect(() => {
-    api<{ user: SessionUser }>("/auth/me")
+    api<{ user: User }>("/auth/me")
       .then((r) => setUser(r.user))
-      .catch(() => setUser(null))
-      .finally(() => setReady(true));
-    // Any 401 from a later request means the session expired.
-    const onExpired = () => setUser(null);
-    window.addEventListener("nexora:unauthorized", onExpired);
-    return () => window.removeEventListener("nexora:unauthorized", onExpired);
+      .catch(() => setUser(null));
+    const onSignedOut = () => setUser(null);
+    window.addEventListener("nexora:signed-out", onSignedOut);
+    return () => window.removeEventListener("nexora:signed-out", onSignedOut);
   }, []);
 
-  const login = useCallback(async (username: string, password: string) => {
-    const r = await api<{ user: SessionUser }>("/auth/login", { method: "POST", body: { username, password } });
-    setUser(r.user);
-  }, []);
-
-  const signup = useCallback(async (data: { username: string; displayName: string; email: string; password: string }) => {
-    const r = await api<{ user: SessionUser }>("/auth/signup", { method: "POST", body: data });
+  const login = useCallback(async (email: string, password: string) => {
+    const r = await api<{ user: User }>("/auth/login", { method: "POST", body: { email, password } });
     setUser(r.user);
   }, []);
 
   const logout = useCallback(async () => {
-    await api("/auth/logout", { method: "POST" }).catch(() => {});
+    await api("/auth/logout", { method: "POST" });
     setUser(null);
   }, []);
 
-  const can = useCallback((...roles: Role[]) => !!user && (user.roles.includes("ADMIN") || roles.some((r) => user.roles.includes(r))), [user]);
-
-  const value = useMemo(() => ({ user, ready, login, signup, logout, can }), [user, ready, login, signup, logout, can]);
-  return <AuthContext value={value}>{children}</AuthContext>;
+  return <AuthContext.Provider value={{ user, login, logout }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
   return ctx;
+}
+
+/** The signed-in user; only call this inside routes that require sign-in. */
+export function useUser() {
+  const { user } = useAuth();
+  if (!user) throw new Error("useUser called while signed out");
+  return user;
 }
