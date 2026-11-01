@@ -1,6 +1,6 @@
 /**
  * A small Active Directory look-alike for development and tests, built on ldapjs' server.
- * Supports what Kompass uses: simple bind, subtree search with AD-style attributes
+ * Supports what Nexora uses: simple bind, subtree search with AD-style attributes
  * (sAMAccountName, memberOf, userAccountControl). Not for production.
  */
 import ldap from "ldapjs";
@@ -21,15 +21,15 @@ interface LdapServer {
 export const BASE = "DC=rheinwerk,DC=local";
 export const USERS_OU = `OU=Users,${BASE}`;
 export const GROUPS_OU = `OU=Groups,${BASE}`;
-export const SERVICE_DN = `CN=svc-kompass,OU=Service Accounts,${BASE}`;
+export const SERVICE_DN = `CN=svc-nexora,OU=Service Accounts,${BASE}`;
 
 export const GROUPS = {
-  ADMIN: `CN=Kompass-Admins,${GROUPS_OU}`,
-  HR: `CN=Kompass-HR,${GROUPS_OU}`,
-  SALES: `CN=Kompass-Sales,${GROUPS_OU}`,
-  AFTERSALES: `CN=Kompass-AfterSales,${GROUPS_OU}`,
-  ACCOUNTING: `CN=Kompass-Accounting,${GROUPS_OU}`,
-  MANAGER: `CN=Kompass-Managers,${GROUPS_OU}`,
+  ADMIN: `CN=Nexora-Admins,${GROUPS_OU}`,
+  HR: `CN=Nexora-HR,${GROUPS_OU}`,
+  SALES: `CN=Nexora-Sales,${GROUPS_OU}`,
+  AFTERSALES: `CN=Nexora-AfterSales,${GROUPS_OU}`,
+  ACCOUNTING: `CN=Nexora-Accounting,${GROUPS_OU}`,
+  MANAGER: `CN=Nexora-Managers,${GROUPS_OU}`,
 } as const;
 
 /** The value for LDAP_GROUP_ROLE_MAP that matches the groups above. */

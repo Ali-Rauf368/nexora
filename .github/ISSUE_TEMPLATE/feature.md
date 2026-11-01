@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Something that would make your work in Kompass easier
+about: Something that would make your work in Nexora easier
 labels: feature
 ---
 

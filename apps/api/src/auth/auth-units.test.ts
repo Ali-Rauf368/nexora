@@ -15,7 +15,7 @@ describe("escapeFilter", () => {
 
 describe("rolesForGroups", () => {
   it("maps AD groups case-insensitively and always includes EMPLOYEE", () => {
-    expect(rolesForGroups(["cn=kompass-hr,ou=groups,dc=rheinwerk,dc=local"])).toEqual(["HR", "EMPLOYEE"]);
+    expect(rolesForGroups(["cn=nexora-hr,ou=groups,dc=rheinwerk,dc=local"])).toEqual(["HR", "EMPLOYEE"]);
   });
 
   it("ignores unknown groups", () => {
@@ -23,6 +23,6 @@ describe("rolesForGroups", () => {
   });
 
   it("returns roles in a stable order", () => {
-    expect(rolesForGroups(["CN=Kompass-Managers,OU=Groups,DC=rheinwerk,DC=local", "CN=Kompass-Admins,OU=Groups,DC=rheinwerk,DC=local"])).toEqual(["ADMIN", "MANAGER", "EMPLOYEE"]);
+    expect(rolesForGroups(["CN=Nexora-Managers,OU=Groups,DC=rheinwerk,DC=local", "CN=Nexora-Admins,OU=Groups,DC=rheinwerk,DC=local"])).toEqual(["ADMIN", "MANAGER", "EMPLOYEE"]);
   });
 });

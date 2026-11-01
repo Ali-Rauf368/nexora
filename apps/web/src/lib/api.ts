@@ -26,7 +26,7 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
     signal: init.signal,
     headers: {
       Accept: "application/json",
-      ...(method !== "GET" ? { "X-Kompass-Client": "web" } : {}),
+      ...(method !== "GET" ? { "X-Nexora-Client": "web" } : {}),
       ...(init.body !== undefined ? { "Content-Type": "application/json" } : {}),
     },
     body: init.body !== undefined ? JSON.stringify(init.body) : undefined,
@@ -36,7 +36,7 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
   if (!res.ok) {
     const first = Array.isArray(data.details) ? data.details[0] : undefined;
     const msg = first?.message ? `${data.error}: ${first.path ? `${first.path} – ` : ""}${first.message}` : (data.error ?? res.statusText);
-    if (res.status === 401 && path !== "/auth/login" && path !== "/auth/me") window.dispatchEvent(new Event("kompass:unauthorized"));
+    if (res.status === 401 && path !== "/auth/login" && path !== "/auth/me") window.dispatchEvent(new Event("nexora:unauthorized"));
     throw new ApiError(res.status, msg, data.details);
   }
   return data as T;

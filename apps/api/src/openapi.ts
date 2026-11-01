@@ -11,15 +11,15 @@ const session = [{ cookieAuth: [] }];
 export const openapi = {
   openapi: "3.1.0",
   info: {
-    title: "Kompass API",
+    title: "Nexora API",
     version: "1.0.0",
     description:
-      "Internal operations platform of the Rheinwerk Gruppe. Browser clients authenticate with the session cookie set by POST /api/auth/login (LDAP) and must send `X-Kompass-Client: web` on writes. NiFi uses `X-Api-Key` on /api/ingest. Live updates: WebSocket at /ws.",
+      "Internal operations platform of the Rheinwerk Gruppe. Browser clients authenticate with the session cookie set by POST /api/auth/login (LDAP) and must send `X-Nexora-Client: web` on writes. NiFi uses `X-Api-Key` on /api/ingest. Live updates: WebSocket at /ws.",
   },
   servers: [{ url: "/" }],
   components: {
     securitySchemes: {
-      cookieAuth: { type: "apiKey", in: "cookie", name: "kompass_session" },
+      cookieAuth: { type: "apiKey", in: "cookie", name: "nexora_session" },
       apiKey: { type: "apiKey", in: "header", name: "X-Api-Key" },
     },
     schemas: {
@@ -31,7 +31,7 @@ export const openapi = {
   paths: {
     "/api/health": { get: { tags: ["System"], security: [], summary: "Health and dependency checks", responses: { "200": ok("Healthy"), "503": ok("A dependency is down") } } },
     "/api/auth/login": {
-      post: { tags: ["Auth"], security: [], summary: "Sign in with Active Directory credentials", requestBody: body({ type: "object", required: ["username", "password"], properties: { username: { type: "string", example: "anna.schmidt" }, password: { type: "string", example: "kompass" } } }), responses: { "200": ok("Signed in; sets the session cookie"), "401": ok("Wrong credentials", err), "429": ok("Rate limited", err), "503": ok("Directory unreachable", err) } },
+      post: { tags: ["Auth"], security: [], summary: "Sign in with Active Directory credentials", requestBody: body({ type: "object", required: ["username", "password"], properties: { username: { type: "string", example: "anna.schmidt" }, password: { type: "string", example: "nexora" } } }), responses: { "200": ok("Signed in; sets the session cookie"), "401": ok("Wrong credentials", err), "429": ok("Rate limited", err), "503": ok("Directory unreachable", err) } },
     },
     "/api/auth/signup": {
       post: { tags: ["Auth"], security: [], summary: "Create a self-registered account (EMPLOYEE role only)", requestBody: body({ type: "object", required: ["username", "displayName", "email", "password"], properties: { username: { type: "string", example: "max.muster" }, displayName: { type: "string", example: "Max Muster" }, email: { type: "string", example: "max@example.com" }, password: { type: "string", minLength: 10 } } }), responses: { "201": ok("Account created; sets the session cookie"), "400": ok("Invalid input", err), "409": ok("Username taken", err), "429": ok("Rate limited", err), "503": ok("Directory unreachable", err) } },

@@ -1,4 +1,4 @@
--- Kompass analytics warehouse: a Kimball-style star schema in its own Postgres schema.
+-- Nexora analytics warehouse: a Kimball-style star schema in its own Postgres schema.
 -- Facts are rebuilt from the operational tables by analytics-refresh.sql; dimensions are merged.
 -- Idempotent: safe to run on every deploy.
 

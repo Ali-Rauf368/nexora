@@ -19,12 +19,12 @@ const port = Number(process.env.E2E_API_PORT ?? 4110);
 const freePort = () => new Promise<number>((r) => { const s = netServer().listen(0, () => { const p = (s.address() as { port: number }).port; s.close(() => r(p)); }); });
 
 async function main() {
-  const dir = mkdtempSync(path.join(tmpdir(), "kompass-e2e-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "nexora-e2e-"));
   const pgPort = await freePort();
   execFileSync(`${PGBIN}/initdb`, ["-D", `${dir}/pg`, "-U", "e2e", "--auth=trust", "--no-sync"], { stdio: "ignore" });
   execFileSync(`${PGBIN}/pg_ctl`, ["-D", `${dir}/pg`, "-o", `-p ${pgPort} -k ${dir} -c listen_addresses=localhost -c fsync=off`, "-l", `${dir}/pg.log`, "-w", "start"], { stdio: "ignore" });
   spawn("sh", ["-c", `while kill -0 ${process.pid} 2>/dev/null; do sleep 1; done; "${PGBIN}/pg_ctl" -D "${dir}/pg" -m immediate stop; rm -rf "${dir}"`], { detached: true, stdio: "ignore" }).unref();
-  execFileSync(`${PGBIN}/createdb`, ["-h", "localhost", "-p", String(pgPort), "-U", "e2e", "kompass"]);
+  execFileSync(`${PGBIN}/createdb`, ["-h", "localhost", "-p", String(pgPort), "-U", "e2e", "nexora"]);
 
   const runtime = await mongoRuntime();
   Object.assign(process.env, runtime.env);
@@ -33,8 +33,8 @@ async function main() {
 
   Object.assign(process.env, {
     NODE_ENV: "production",
-    DATABASE_URL: `postgresql://e2e@localhost:${pgPort}/kompass`,
-    MONGO_URL: `${mongo.getUri()}kompass`,
+    DATABASE_URL: `postgresql://e2e@localhost:${pgPort}/nexora`,
+    MONGO_URL: `${mongo.getUri()}nexora`,
     JWT_SECRET: "e2e-secret-0123456789abcdef",
     INGEST_API_KEY: "e2e-ingest-key-0123456789",
     LDAP_URL: ldap.url,

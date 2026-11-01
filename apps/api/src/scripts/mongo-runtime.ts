@@ -21,7 +21,7 @@ export function cpuHasAvx(): boolean {
 }
 
 async function ensureLibssl11(): Promise<string> {
-  const dir = path.join(homedir(), ".cache", "kompass-libssl");
+  const dir = path.join(homedir(), ".cache", "nexora-libssl");
   const libDir = path.join(dir, "extracted", "usr", "lib", "x86_64-linux-gnu");
   if (existsSync(path.join(libDir, "libssl.so.1.1"))) return libDir;
   mkdirSync(dir, { recursive: true });

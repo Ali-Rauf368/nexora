@@ -1,7 +1,7 @@
 {
-  "name": "kompass",
+  "name": "nexora",
   "private": true,
-  "description": "Kompass – internal operations platform of the Rheinwerk Gruppe",
+  "description": "Nexora – internal operations platform of the Rheinwerk Gruppe",
   "workspaces": [
     "apps/api",
     "apps/web",
@@ -12,6 +12,8 @@
   },
   "scripts": {
     "dev": "npm run dev:services && concurrently -n api,web -c blue,magenta \"npm -w apps/api run dev\" \"npm -w apps/web run dev\"",
+    "server": "npm run dev:services && npm -w apps/api run dev",
+    "client": "npm -w apps/web run dev",
     "dev:services": "bash scripts/dev-services.sh start",
     "stop:services": "bash scripts/dev-services.sh stop",
     "db:migrate": "npm -w apps/api run db:migrate",

@@ -4,7 +4,7 @@ const roleMap = z
   .string()
   .default("")
   .transform((raw) =>
-    // "CN=Kompass-Admins,OU=Groups,DC=rheinwerk,DC=local=ADMIN;CN=HR,...=HR"
+    // "CN=Nexora-Admins,OU=Groups,DC=rheinwerk,DC=local=ADMIN;CN=HR,...=HR"
     Object.fromEntries(
       raw
         .split(";")
@@ -27,7 +27,7 @@ const schema = z.object({
   CORS_ORIGIN: z.string().default("http://localhost:5190"),
   TRUST_PROXY: z.string().optional(),
   LDAP_URL: z.string().default("ldap://localhost:3890"),
-  LDAP_BIND_DN: z.string().default("CN=svc-kompass,OU=Service Accounts,DC=rheinwerk,DC=local"),
+  LDAP_BIND_DN: z.string().default("CN=svc-nexora,OU=Service Accounts,DC=rheinwerk,DC=local"),
   LDAP_BIND_PASSWORD: z.string().default("svc-password"),
   LDAP_BASE_DN: z.string().default("OU=Users,DC=rheinwerk,DC=local"),
   /** {{username}} is replaced with the escaped login name. */

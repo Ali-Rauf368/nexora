@@ -3,10 +3,10 @@ import { expect, test as base, type Page } from "@playwright/test";
 
 export async function signIn(page: Page, username: string) {
   await page.goto("/login");
-  await page.evaluate(() => localStorage.setItem("kompass.lang", "en"));
+  await page.evaluate(() => localStorage.setItem("nexora.lang", "en"));
   await page.reload();
   await page.getByLabel("Username").fill(username);
-  await page.getByLabel("Password").fill("kompass");
+  await page.getByLabel("Password").fill("nexora");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
 }

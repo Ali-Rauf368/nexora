@@ -3,7 +3,7 @@ import { rmSync } from "node:fs";
 import type { MongoMemoryServer } from "mongodb-memory-server";
 
 export default async function globalTeardown() {
-  const state = (globalThis as unknown as { __KOMPASS__?: { dir: string; mongo: MongoMemoryServer; ldap: { close(): Promise<void> } } }).__KOMPASS__;
+  const state = (globalThis as unknown as { __NEXORA__?: { dir: string; mongo: MongoMemoryServer; ldap: { close(): Promise<void> } } }).__NEXORA__;
   if (!state) return;
   await state.ldap.close();
   await state.mongo.stop();

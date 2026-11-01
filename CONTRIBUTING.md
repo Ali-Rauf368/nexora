@@ -1,4 +1,4 @@
-# Contributing to Kompass
+# Contributing to Nexora
 
 ## Workflow
 

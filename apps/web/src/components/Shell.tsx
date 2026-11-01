@@ -49,7 +49,7 @@ function useTheme() {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
     try {
-      localStorage.setItem("kompass.theme", dark ? "dark" : "light");
+      localStorage.setItem("nexora.theme", dark ? "dark" : "light");
     } catch {
       /* ignore */
     }
@@ -160,7 +160,7 @@ export function Shell() {
     <Link to="/" className="flex items-center gap-3 px-5 py-5">
       <img src="/favicon.svg" alt="" className="size-8 rounded-lg" />
       <span>
-        <span className="block text-base font-semibold leading-tight text-ink">Kompass</span>
+        <span className="block text-base font-semibold leading-tight text-ink">Nexora</span>
         <span className="block text-xs text-ink-3">Rheinwerk Gruppe</span>
       </span>
     </Link>
@@ -190,7 +190,7 @@ export function Shell() {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 flex h-16 items-center gap-1 border-b border-line bg-panel/85 px-3 backdrop-blur-md sm:gap-2 sm:px-6">
           <button onClick={() => setMobile(true)} className="rounded-lg p-2 text-ink-2 hover:bg-sunken lg:hidden" aria-label={t("shell.menu")}><Menu className="size-5" /></button>
-          <Link to="/" className="flex items-center gap-2 lg:hidden" aria-label="Kompass"><img src="/favicon.svg" alt="" className="size-7 rounded-md" /><span className="hidden font-semibold min-[400px]:inline">Kompass</span></Link>
+          <Link to="/" className="flex items-center gap-2 lg:hidden" aria-label="Nexora"><img src="/favicon.svg" alt="" className="size-7 rounded-md" /><span className="hidden font-semibold min-[400px]:inline">Nexora</span></Link>
           <div className="flex-1" />
           <span className="me-2 hidden items-center gap-1.5 rounded-full bg-sunken px-2.5 py-1 text-xs text-ink-2 sm:flex" role="status" title={t(live ? "shell.live.on" : "shell.live.off")}>
             <span className={clsx("size-2 rounded-full", live ? "bg-emerald-500" : "animate-pulse bg-amber-500")} aria-hidden />

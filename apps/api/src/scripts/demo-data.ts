@@ -111,7 +111,7 @@ export function demoEmployees(): DemoEmployee[] {
   return people;
 }
 
-export const DEMO_PASSWORD = "kompass";
+export const DEMO_PASSWORD = "nexora";
 
 export const DEMO_DIRECTORY: DirectoryEntry[] = demoEmployees().map((e) => ({
   username: e.username,

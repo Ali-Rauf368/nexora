@@ -16,12 +16,12 @@ export function useDatabases() {
   });
 }
 
-const CSRF = { "X-Kompass-Client": "web" };
+const CSRF = { "X-Nexora-Client": "web" };
 
-/** A supertest agent signed in as a demo user (password "kompass"); keeps the session cookie. */
+/** A supertest agent signed in as a demo user (password "nexora"); keeps the session cookie. */
 export async function signIn(username: string) {
   const agent = request.agent(app);
-  const res = await agent.post("/api/auth/login").set(CSRF).send({ username, password: "kompass" });
+  const res = await agent.post("/api/auth/login").set(CSRF).send({ username, password: "nexora" });
   if (res.status !== 200) throw new Error(`login failed for ${username}: ${res.status} ${JSON.stringify(res.body)}`);
   return {
     agent,

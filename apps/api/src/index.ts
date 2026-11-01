@@ -11,7 +11,7 @@ async function main() {
   await Promise.all([connectMongo(), prisma().$queryRaw`SELECT 1`]);
   const server = createServer(createApp());
   attachRealtime(server);
-  server.listen(c.PORT, () => logger.info(`Kompass API on http://localhost:${c.PORT} (docs: /api/docs, websocket: /ws)`));
+  server.listen(c.PORT, () => logger.info(`Nexora API on http://localhost:${c.PORT} (docs: /api/docs, websocket: /ws)`));
 
   const shutdown = (signal: string) => {
     logger.info(`${signal} received, shutting down`);

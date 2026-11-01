@@ -4,7 +4,7 @@
 
 ## Context
 
-Kompass stores structured business records (employees, deals, tickets, invoices) that need relations,
+Nexora stores structured business records (employees, deals, tickets, invoices) that need relations,
 constraints and reporting, as well as append-only, loosely structured data (audit events with varying
 details, ticket activity feeds, notifications, raw integration payloads).
 

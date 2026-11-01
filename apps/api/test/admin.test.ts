@@ -41,6 +41,6 @@ describe("system", () => {
   });
 
   it("returns 400 for malformed JSON", async () => {
-    await api().post("/api/auth/login").set("X-Kompass-Client", "web").set("Content-Type", "application/json").send("{bad").expect(400);
+    await api().post("/api/auth/login").set("X-Nexora-Client", "web").set("Content-Type", "application/json").send("{bad").expect(400);
   });
 });

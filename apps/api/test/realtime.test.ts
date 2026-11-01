@@ -27,7 +27,7 @@ afterAll(async () => {
 async function connect(username: string) {
   const s = await signIn(username);
   const cookie = (await s.agent.get("/api/auth/me")).request.getHeader("Cookie") as string | undefined;
-  const sessionCookie = cookie ?? (s.agent as unknown as { jar: { getCookie(n: string, o: object): { toValueString(): string } } }).jar.getCookie("kompass_session", { path: "/", domain: "127.0.0.1" })?.toValueString();
+  const sessionCookie = cookie ?? (s.agent as unknown as { jar: { getCookie(n: string, o: object): { toValueString(): string } } }).jar.getCookie("nexora_session", { path: "/", domain: "127.0.0.1" })?.toValueString();
   const ws = new WebSocket(`ws://127.0.0.1:${port}/ws`, { headers: { Cookie: sessionCookie ?? "" } });
   const messages: { type: string; [k: string]: unknown }[] = [];
   ws.on("message", (m) => messages.push(JSON.parse(String(m))));

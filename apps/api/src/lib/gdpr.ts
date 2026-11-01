@@ -2,7 +2,7 @@ import { AuditEvent, Notification, TicketActivity } from "../db/mongo";
 import { prisma } from "../db/prisma";
 import { HttpError, notFound } from "./errors";
 
-/** Everything Kompass stores about an employee (GDPR Art. 15 / Art. 20, machine-readable). */
+/** Everything Nexora stores about an employee (GDPR Art. 15 / Art. 20, machine-readable). */
 export async function exportEmployeeData(employeeId: number) {
   const db = prisma();
   const employee = await db.employee.findUnique({
