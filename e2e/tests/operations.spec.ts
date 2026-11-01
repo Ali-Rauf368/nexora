@@ -65,5 +65,5 @@ test("employees can download their GDPR data export", async ({ page }) => {
   await page.goto("/admin/privacy");
   const download = page.waitForEvent("download");
   await page.getByRole("link", { name: "Download data export" }).click();
-  expect((await download).suggestedFilename()).toMatch(/kompass-data-export-\d+\.json/);
+  expect((await download).suggestedFilename()).toMatch(/nexora-data-export-\d+\.json/);
 });

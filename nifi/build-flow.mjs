@@ -1,6 +1,6 @@
 /**
- * Builds the Kompass integration flow in a running NiFi 2.x via its REST API and exports it as a
- * versionable flow definition (nifi/kompass-flow.json) that can be imported with "Upload flow definition".
+ * Builds the Nexora integration flow in a running NiFi 2.x via its REST API and exports it as a
+ * versionable flow definition (nifi/nexora-flow.json) that can be imported with "Upload flow definition".
  *
  *   NIFI_URL=https://localhost:8444/nifi-api NIFI_USER=admin NIFI_PASSWORD=... node nifi/build-flow.mjs
  *
@@ -33,7 +33,7 @@ async function login() {
   const res = await fetch(`${BASE}/access/token`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ username: env("NIFI_USER", "admin"), password: env("NIFI_PASSWORD", "kompass-nifi-dev") }),
+    body: new URLSearchParams({ username: env("NIFI_USER", "admin"), password: env("NIFI_PASSWORD", "nexora-nifi-dev") }),
   });
   if (!res.ok) throw new Error(`login failed: ${res.status} ${await res.text()}`);
   token = await res.text();
@@ -95,17 +95,17 @@ async function group(parentId, name, x, y, comments) {
 async function main() {
   await login();
   const root = (await call("GET", "/flow/process-groups/root")).processGroupFlow.id;
-  const existing = (await call("GET", `/process-groups/${root}/process-groups`)).processGroups.find((g) => g.component.name === "Kompass Integration");
-  if (existing) throw new Error(`"Kompass Integration" already exists (${existing.id}); delete it in the NiFi UI first`);
+  const existing = (await call("GET", `/process-groups/${root}/process-groups`)).processGroups.find((g) => g.component.name === "Nexora Integration");
+  if (existing) throw new Error(`"Nexora Integration" already exists (${existing.id}); delete it in the NiFi UI first`);
 
   const params = await call("POST", "/parameter-contexts", {
     ...rev,
     component: {
-      name: "Kompass",
-      description: "Endpoints and secrets for the Kompass integration. Set per environment.",
+      name: "Nexora",
+      description: "Endpoints and secrets for the Nexora integration. Set per environment.",
       parameters: [
-        { parameter: { name: "KOMPASS_API_URL", value: env("KOMPASS_API_URL", "http://localhost:4100"), description: "Base URL of the Kompass API" } },
-        { parameter: { name: "KOMPASS_INGEST_API_KEY", value: env("KOMPASS_INGEST_API_KEY", "dev-ingest-key-change-me-0123456789"), sensitive: true, description: "INGEST_API_KEY of the Kompass API" } },
+        { parameter: { name: "NEXORA_API_URL", value: env("NEXORA_API_URL", "http://localhost:4100"), description: "Base URL of the Nexora API" } },
+        { parameter: { name: "NEXORA_INGEST_API_KEY", value: env("NEXORA_INGEST_API_KEY", "dev-ingest-key-change-me-0123456789"), sensitive: true, description: "INGEST_API_KEY of the Nexora API" } },
         { parameter: { name: "ERP_INBOX", value: env("ERP_INBOX", path.join(here, "inbox")), description: "Folder the ERP writes nightly invoice exports to" } },
         { parameter: { name: "ERP_FAILED", value: env("ERP_FAILED", path.join(here, "failed")), description: "Exports the API rejected completely or that could not be delivered" } },
         { parameter: { name: "CRM_URL", value: env("CRM_URL", "http://localhost:4200"), description: "Base URL of the CRM REST API" } },
@@ -113,23 +113,23 @@ async function main() {
     },
   });
 
-  const top = await group(root, "Kompass Integration", 0, 0, "ERP and CRM data into the Kompass platform. See docs/nifi.md.");
+  const top = await group(root, "Nexora Integration", 0, 0, "ERP and CRM data into the Nexora platform. See docs/nifi.md.");
   await call("PUT", `/process-groups/${top.id}`, { revision: top.revision, component: { id: top.id, parameterContext: { id: params.id } } });
 
-  // ── ERP invoices: nightly CSV export → JSON → Kompass ────────────────────────
+  // ── ERP invoices: nightly CSV export → JSON → Nexora ────────────────────────
   const erp = await group(top.id, "ERP invoices (CSV)", 0, 0, "GetFile → ConvertRecord (CSV→JSON) → InvokeHTTP POST /api/ingest/erp-invoices");
   await call("PUT", `/process-groups/${erp.id}`, { revision: erp.revision, component: { id: erp.id, parameterContext: { id: params.id } } });
   const csv = await service(erp.id, "CSVReader", "ERP CSV (semicolon, header)", { "Schema Access Strategy": "Use String Fields From Header", "CSV Format": "Custom Format", "Value Separator": ";", "Treat First Line as Header": "true" });
   const json = await service(erp.id, "JsonRecordSetWriter", "JSON array", { "Output Grouping": "Array" });
   const getFile = await processor(erp.id, "GetFile", "Pick up ERP export", 0, 0, { "Input Directory": "#{ERP_INBOX}", "File Filter": "invoices_.*\\.csv", "Keep Source File": "false" }, { schedule: "1 min", comments: "The ERP writes invoices_YYYY-MM-DD.csv around 02:00." });
   const convert = await processor(erp.id, "ConvertRecord", "CSV to JSON", 0, 220, { "Record Reader": csv.id, "Record Writer": json.id });
-  const postInvoices = await processor(erp.id, "InvokeHTTP", "POST to Kompass", 0, 440, {
+  const postInvoices = await processor(erp.id, "InvokeHTTP", "POST to Nexora", 0, 440, {
     "HTTP Method": "POST",
-    "HTTP URL": "#{KOMPASS_API_URL}/api/ingest/erp-invoices",
+    "HTTP URL": "#{NEXORA_API_URL}/api/ingest/erp-invoices",
     "Request Content-Type": "application/json",
-    "X-Api-Key": "#{KOMPASS_INGEST_API_KEY}",
+    "X-Api-Key": "#{NEXORA_INGEST_API_KEY}",
     "X-Batch-Id": "${filename}",
-  }, { terminate: ["Response", "Original"], penalty: "60 sec", sensitiveDynamic: ["X-Api-Key"], comments: "200 = all applied, 207 = some rows rejected (see Kompass › Data pipelines). Same filename = same batch, so retries are idempotent." });
+  }, { terminate: ["Response", "Original"], penalty: "60 sec", sensitiveDynamic: ["X-Api-Key"], comments: "200 = all applied, 207 = some rows rejected (see Nexora › Data pipelines). Same filename = same batch, so retries are idempotent." });
   const parkErp = await processor(erp.id, "PutFile", "Park failed export", 480, 440, { Directory: "#{ERP_FAILED}", "Conflict Resolution Strategy": "replace" }, { terminate: ["success", "failure"] });
   await connect(erp.id, getFile, convert, ["success"]);
   await connect(erp.id, convert, postInvoices, ["success"]);
@@ -137,16 +137,16 @@ async function main() {
   await connect(erp.id, postInvoices, postInvoices, ["Retry"], { bends: [{ x: -220, y: 470 }, { x: -220, y: 560 }] });
   await connect(erp.id, postInvoices, parkErp, ["No Retry", "Failure"]);
 
-  // ── CRM customers: poll REST API → map fields → Kompass ─────────────────────
+  // ── CRM customers: poll REST API → map fields → Nexora ─────────────────────
   const crm = await group(top.id, "CRM customers (REST)", 520, 0, "InvokeHTTP GET (every 15 min) → JoltTransformJSON → InvokeHTTP POST /api/ingest/crm-customers");
   await call("PUT", `/process-groups/${crm.id}`, { revision: crm.revision, component: { id: crm.id, parameterContext: { id: params.id } } });
   const fetchCrm = await processor(crm.id, "InvokeHTTP", "GET customers from CRM", 0, 0, { "HTTP Method": "GET", "HTTP URL": "#{CRM_URL}/api/v2/kunden" }, { schedule: "15 min", terminate: ["Original", "Retry", "No Retry", "Failure"], comments: "Runs without an incoming connection, so NiFi triggers it on the schedule." });
-  const jolt = await processor(crm.id, "JoltTransformJSON", "Map CRM fields", 0, 220, { "Jolt Transform": "Chain", "Jolt Specification": readFileSync(path.join(here, "crm-to-kompass.jolt.json"), "utf8") }, { terminate: ["failure"] });
-  const postCustomers = await processor(crm.id, "InvokeHTTP", "POST to Kompass", 0, 440, {
+  const jolt = await processor(crm.id, "JoltTransformJSON", "Map CRM fields", 0, 220, { "Jolt Transform": "Chain", "Jolt Specification": readFileSync(path.join(here, "crm-to-nexora.jolt.json"), "utf8") }, { terminate: ["failure"] });
+  const postCustomers = await processor(crm.id, "InvokeHTTP", "POST to Nexora", 0, 440, {
     "HTTP Method": "POST",
-    "HTTP URL": "#{KOMPASS_API_URL}/api/ingest/crm-customers",
+    "HTTP URL": "#{NEXORA_API_URL}/api/ingest/crm-customers",
     "Request Content-Type": "application/json",
-    "X-Api-Key": "#{KOMPASS_INGEST_API_KEY}",
+    "X-Api-Key": "#{NEXORA_INGEST_API_KEY}",
     "X-Batch-Id": "crm-${now():format('yyyyMMdd-HHmm')}",
   }, { terminate: ["Response", "Original", "No Retry", "Failure"], penalty: "60 sec", sensitiveDynamic: ["X-Api-Key"] });
   await connect(crm.id, fetchCrm, jolt, ["Response"]);
@@ -168,8 +168,8 @@ async function main() {
   if (problems.length) throw new Error(`invalid processors:\n  ${problems.join("\n  ")}`);
 
   const definition = await call("GET", `/process-groups/${top.id}/download?includeReferencedServices=true`);
-  writeFileSync(path.join(here, "kompass-flow.json"), `${JSON.stringify(definition, null, 2)}\n`);
-  console.log(`flow built and valid; exported to nifi/kompass-flow.json (group ${top.id})`);
+  writeFileSync(path.join(here, "nexora-flow.json"), `${JSON.stringify(definition, null, 2)}\n`);
+  console.log(`flow built and valid; exported to nifi/nexora-flow.json (group ${top.id})`);
   if (process.argv.includes("--start")) {
     await call("PUT", `/flow/process-groups/${top.id}`, { id: top.id, state: "RUNNING" });
     console.log("all processors started");

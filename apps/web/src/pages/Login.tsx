@@ -57,7 +57,7 @@ export function LoginPage() {
         <p className="mb-3 text-xs font-semibold tracking-wide text-ink-3 uppercase">{t("login.demo")}</p>
         <div className="grid gap-2 min-[400px]:grid-cols-2">
           {DEMO.map(([u, role]) => (
-            <button key={u} type="button" onClick={() => { setUsername(u); setPassword("kompass"); }} className="rounded-lg border border-line px-3 py-2 text-start text-xs transition hover:border-accent hover:bg-accent-soft">
+            <button key={u} type="button" onClick={() => { setUsername(u); setPassword("nexora"); }} className="rounded-lg border border-line px-3 py-2 text-start text-xs transition hover:border-accent hover:bg-accent-soft">
               <span className="block font-medium">{u}</span>
               <span className="text-ink-3">{role}</span>
             </button>

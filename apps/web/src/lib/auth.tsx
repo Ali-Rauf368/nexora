@@ -25,8 +25,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setReady(true));
     // Any 401 from a later request means the session expired.
     const onExpired = () => setUser(null);
-    window.addEventListener("kompass:unauthorized", onExpired);
-    return () => window.removeEventListener("kompass:unauthorized", onExpired);
+    window.addEventListener("nexora:unauthorized", onExpired);
+    return () => window.removeEventListener("nexora:unauthorized", onExpired);
   }, []);
 
   const login = useCallback(async (username: string, password: string) => {

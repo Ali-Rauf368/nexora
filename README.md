@@ -1,6 +1,6 @@
-# Kompass
+# Nexora
 
-Kompass is the internal operations platform of the Rheinwerk Gruppe. It brings our four companies (Haustechnik, Solar, Elektro and Kundenservice) into one place, so people stop jumping between the ERP, the CRM, spreadsheets and email to get their work done.
+Nexora is the internal operations platform of the Rheinwerk Gruppe. It brings our four companies (Haustechnik, Solar, Elektro and Kundenservice) into one place, so people stop jumping between the ERP, the CRM, spreadsheets and email to get their work done.
 
 What you can do in it today:
 
@@ -46,7 +46,7 @@ After the first time, `npm run dev` is all you need, because it starts the servi
 
 ### Demo accounts
 
-Every demo account uses the password **`kompass`**:
+Every demo account uses the password **`nexora`**:
 
 | Username | Role |
 |---|---|

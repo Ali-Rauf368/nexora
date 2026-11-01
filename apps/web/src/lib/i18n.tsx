@@ -38,7 +38,7 @@ const dict = {
   "login.username": ["Benutzername", "Username"],
   "login.password": ["Passwort", "Password"],
   "login.submit": ["Anmelden", "Sign in"],
-  "login.demo": ["Demo-Konten (Passwort: kompass)", "Demo accounts (password: kompass)"],
+  "login.demo": ["Demo-Konten (Passwort: nexora)", "Demo accounts (password: nexora)"],
   "login.noAccount": ["Noch kein Konto?", "No account yet?"],
   "login.toSignup": ["Jetzt registrieren", "Create one"],
   "signup.title": ["Konto erstellen", "Create your account"],
@@ -277,7 +277,7 @@ const dict = {
   "privacy.title": ["Datenschutz", "Privacy"],
   "privacy.subtitle": ["Betroffenenrechte nach DSGVO", "Data subject rights under the GDPR"],
   "privacy.myData": ["Meine Daten", "My data"],
-  "privacy.myData.text": ["Laden Sie alle Daten herunter, die Kompass über Sie speichert (Art. 15 DSGVO).", "Download everything Kompass stores about you (GDPR Art. 15)."],
+  "privacy.myData.text": ["Laden Sie alle Daten herunter, die Nexora über Sie speichert (Art. 15 DSGVO).", "Download everything Nexora stores about you (GDPR Art. 15)."],
   "privacy.download": ["Datenexport herunterladen", "Download data export"],
   "privacy.erase": ["Löschung ehemaliger Mitarbeitender", "Erasure of former employees"],
   "privacy.erase.text": ["Ausgeschiedene Personen werden pseudonymisiert (Art. 17 DSGVO). Geschäftsunterlagen bleiben wegen gesetzlicher Aufbewahrungsfristen erhalten.", "Former employees are pseudonymised (GDPR Art. 17). Business records stay because of statutory retention periods."],
@@ -313,7 +313,7 @@ export function I18nProvider({ children, initial }: { children: ReactNode; initi
   const [lang, setLangState] = useState<Lang>(() => {
     if (initial) return initial;
     try {
-      return (localStorage.getItem("kompass.lang") as Lang) || "en";
+      return (localStorage.getItem("nexora.lang") as Lang) || "en";
     } catch {
       return "en";
     }
@@ -322,7 +322,7 @@ export function I18nProvider({ children, initial }: { children: ReactNode; initi
     setLangState(l);
     document.documentElement.lang = l;
     try {
-      localStorage.setItem("kompass.lang", l);
+      localStorage.setItem("nexora.lang", l);
     } catch {
       /* private mode */
     }

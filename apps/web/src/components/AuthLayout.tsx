@@ -15,7 +15,7 @@ export function AuthLayout({ title, subtitle, children, footer }: { title: strin
         <div className="relative flex items-center gap-3">
           <img src="/favicon.svg" alt="" className="size-10 rounded-xl bg-white/15 p-1" />
           <div>
-            <p className="text-lg font-semibold">Kompass</p>
+            <p className="text-lg font-semibold">Nexora</p>
             <p className="text-sm text-white/75">Rheinwerk Gruppe · Köln</p>
           </div>
         </div>
@@ -35,7 +35,7 @@ export function AuthLayout({ title, subtitle, children, footer }: { title: strin
         <div className="mx-auto w-full max-w-md rounded-2xl border border-line bg-panel p-6 shadow-card sm:p-8">
           <div className="mb-6 flex items-center gap-2.5 lg:hidden">
             <img src="/favicon.svg" alt="" className="size-9 rounded-lg" />
-            <span><span className="block font-semibold leading-tight">Kompass</span><span className="block text-xs text-ink-3">Rheinwerk Gruppe</span></span>
+            <span><span className="block font-semibold leading-tight">Nexora</span><span className="block text-xs text-ink-3">Rheinwerk Gruppe</span></span>
           </div>
           <div className="mb-6 flex items-start justify-between gap-3">
             <div>

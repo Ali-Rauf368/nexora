@@ -220,7 +220,7 @@ export async function seedDatabase(opts: { now?: Date; withMongo?: boolean } = {
     await Promise.all([AuditEvent.deleteMany({}), Notification.deleteMany({}), TicketActivity.deleteMany({}), RawIngest.deleteMany({})]);
     const recent = await db.ticket.findMany({ include: { assignee: true } });
     const activities = recent.flatMap((t) => {
-      const items: Record<string, unknown>[] = [{ ticketId: t.id, kind: "created", author: "system", authorName: "Kompass", body: `Ticket opened via ${t.channel.toLowerCase()}`, at: t.createdAt }];
+      const items: Record<string, unknown>[] = [{ ticketId: t.id, kind: "created", author: "system", authorName: "Nexora", body: `Ticket opened via ${t.channel.toLowerCase()}`, at: t.createdAt }];
       if (t.firstResponseAt && t.assignee) {
         items.push({ ticketId: t.id, kind: "comment", author: t.assignee.username, authorName: `${t.assignee.firstName} ${t.assignee.lastName}`, body: r.pick(["Called the customer, appointment scheduled.", "Asked customer for photos of the error display.", "Spare part ordered, ETA 2 days.", "Remote diagnosis done, technician needed on site."]), at: t.firstResponseAt });
       }

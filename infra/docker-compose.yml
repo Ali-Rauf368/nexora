@@ -1,16 +1,16 @@
 # Full stack for a single server or local trial: docker compose -f infra/docker-compose.yml up -d
 # Production replaces the "ldap" service with the company's Active Directory (set LDAP_* in .env).
-name: kompass
+name: nexora
 
 services:
   postgres:
     image: postgres:16
     environment:
-      POSTGRES_USER: kompass
+      POSTGRES_USER: nexora
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
-      POSTGRES_DB: kompass
+      POSTGRES_DB: nexora
     volumes: [pgdata:/var/lib/postgresql/data]
-    healthcheck: { test: ["CMD-SHELL", "pg_isready -U kompass"], interval: 5s, retries: 20 }
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U nexora"], interval: 5s, retries: 20 }
     restart: unless-stopped
 
   mongo:
@@ -27,23 +27,23 @@ services:
     restart: unless-stopped
 
   migrate:
-    image: ${KOMPASS_REGISTRY:-ghcr.io/rheinwerk/kompass}/api:${KOMPASS_TAG:-latest}
+    image: ${NEXORA_REGISTRY:-ghcr.io/rheinwerk/nexora}/api:${NEXORA_TAG:-latest}
     build: { context: .., dockerfile: infra/docker/api.Dockerfile }
     command: ["sh", "-c", "npx prisma migrate deploy && node dist/scripts/analytics-setup.js"]
     env_file: ../.env
     environment:
-      DATABASE_URL: postgresql://kompass:${POSTGRES_PASSWORD}@postgres:5432/kompass
-      MONGO_URL: mongodb://mongo:27017/kompass
+      DATABASE_URL: postgresql://nexora:${POSTGRES_PASSWORD}@postgres:5432/nexora
+      MONGO_URL: mongodb://mongo:27017/nexora
     depends_on: { postgres: { condition: service_healthy } }
 
   api:
-    image: ${KOMPASS_REGISTRY:-ghcr.io/rheinwerk/kompass}/api:${KOMPASS_TAG:-latest}
+    image: ${NEXORA_REGISTRY:-ghcr.io/rheinwerk/nexora}/api:${NEXORA_TAG:-latest}
     build: { context: .., dockerfile: infra/docker/api.Dockerfile }
     env_file: ../.env
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://kompass:${POSTGRES_PASSWORD}@postgres:5432/kompass
-      MONGO_URL: mongodb://mongo:27017/kompass
+      DATABASE_URL: postgresql://nexora:${POSTGRES_PASSWORD}@postgres:5432/nexora
+      MONGO_URL: mongodb://mongo:27017/nexora
       TRUST_PROXY: "1"
     depends_on:
       postgres: { condition: service_healthy }
@@ -52,9 +52,9 @@ services:
     restart: unless-stopped
 
   web:
-    image: ${KOMPASS_REGISTRY:-ghcr.io/rheinwerk/kompass}/web:${KOMPASS_TAG:-latest}
+    image: ${NEXORA_REGISTRY:-ghcr.io/rheinwerk/nexora}/web:${NEXORA_TAG:-latest}
     build: { context: .., dockerfile: infra/docker/web.Dockerfile }
-    ports: ["${KOMPASS_PORT:-8080}:80"]
+    ports: ["${NEXORA_PORT:-8080}:80"]
     depends_on: [api]
     restart: unless-stopped
 
@@ -65,8 +65,8 @@ services:
       SINGLE_USER_CREDENTIALS_USERNAME: admin
       SINGLE_USER_CREDENTIALS_PASSWORD: ${NIFI_PASSWORD:?set NIFI_PASSWORD (12+ chars)}
       NIFI_JVM_HEAP_MAX: 2g
-      KOMPASS_API_URL: http://api:4100
-      KOMPASS_INGEST_API_KEY: ${INGEST_API_KEY}
+      NEXORA_API_URL: http://api:4100
+      NEXORA_INGEST_API_KEY: ${INGEST_API_KEY}
     volumes:
       - nifi_conf:/opt/nifi/nifi-current/conf
       - nifi_state:/opt/nifi/nifi-current/state

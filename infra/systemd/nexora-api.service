@@ -1,14 +1,14 @@
 # Alternative to Docker: run the API directly on a Linux server.
-# Install: cp kompass-api.service /etc/systemd/system/ && systemctl enable --now kompass-api
+# Install: cp nexora-api.service /etc/systemd/system/ && systemctl enable --now nexora-api
 [Unit]
-Description=Kompass API
+Description=Nexora API
 After=network-online.target postgresql.service
 Wants=network-online.target
 
 [Service]
-User=kompass
-WorkingDirectory=/opt/kompass/apps/api
-EnvironmentFile=/etc/kompass/api.env
+User=nexora
+WorkingDirectory=/opt/nexora/apps/api
+EnvironmentFile=/etc/nexora/api.env
 ExecStart=/usr/bin/node dist/index.js
 Restart=on-failure
 RestartSec=5
@@ -17,7 +17,7 @@ NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
 PrivateTmp=true
-ReadWritePaths=/var/log/kompass
+ReadWritePaths=/var/log/nexora
 
 [Install]
 WantedBy=multi-user.target

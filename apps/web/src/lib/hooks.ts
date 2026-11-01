@@ -41,7 +41,7 @@ export function useDebounced<T>(value: T, ms = 250) {
 
 export function usePageTitle(title: string) {
   useEffect(() => {
-    document.title = `${title} · Kompass`;
+    document.title = `${title} · Nexora`;
   }, [title]);
 }
 

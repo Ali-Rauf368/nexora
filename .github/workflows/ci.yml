@@ -91,4 +91,4 @@ jobs:
         run: |
           install -m 600 /dev/null ~/.ssh_key && echo "$SSH_KEY" > ~/.ssh_key
           ssh -i ~/.ssh_key -o StrictHostKeyChecking=accept-new deploy@"$HOST" \
-            "cd /opt/kompass && export KOMPASS_TAG=${{ github.sha }} && ./infra/deploy.sh"
+            "cd /opt/nexora && export NEXORA_TAG=${{ github.sha }} && ./infra/deploy.sh"

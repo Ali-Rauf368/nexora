@@ -1,4 +1,4 @@
-// Operational data model of Kompass (OLTP). The analytics star schema lives in the
+// Operational data model of Nexora (OLTP). The analytics star schema lives in the
 // separate "analytics" Postgres schema and is maintained by src/analytics (raw SQL).
 
 generator client {

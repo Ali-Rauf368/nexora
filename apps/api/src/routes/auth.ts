@@ -37,7 +37,7 @@ const SignupBody = z.object({
 
 /**
  * Self-registration. New accounts only ever get EMPLOYEE; further roles still come from AD groups.
- * Usernames that exist in Kompass or in the directory are refused, so nobody can claim a colleague's name.
+ * Usernames that exist in Nexora or in the directory are refused, so nobody can claim a colleague's name.
  */
 router.post("/signup", signupLimiter, async (req, res) => {
   const body = SignupBody.parse(req.body);

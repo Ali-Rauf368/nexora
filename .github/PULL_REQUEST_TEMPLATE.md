@@ -1,6 +1,6 @@
 ## What and why
 
-<!-- What changes for the colleagues using Kompass, and why. Link the issue. -->
+<!-- What changes for the colleagues using Nexora, and why. Link the issue. -->
 
 ## How it was tested
 

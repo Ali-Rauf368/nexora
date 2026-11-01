@@ -6,7 +6,7 @@ async function main() {
   await connectMongo();
   const counts = await seedDatabase();
   console.log("Seeded demo data:", counts);
-  console.log("Log in with anna.schmidt / kompass (admin) — see README for all demo accounts.");
+  console.log("Log in with anna.schmidt / nexora (admin) — see README for all demo accounts.");
 }
 
 main()

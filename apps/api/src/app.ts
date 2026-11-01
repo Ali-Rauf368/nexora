@@ -40,7 +40,7 @@ export function createApp() {
   app.get("/api/openapi.json", (_req, res) => {
     res.json(openapi);
   });
-  app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openapi, { customSiteTitle: "Kompass API" }));
+  app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openapi, { customSiteTitle: "Nexora API" }));
 
   // Machine-to-machine: NiFi authenticates with an API key, not a session.
   app.use("/api/ingest", ingestRoutes);

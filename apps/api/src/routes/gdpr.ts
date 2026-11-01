@@ -17,7 +17,7 @@ router.get("/employees/:id/export", async (req, res) => {
   if (user.employeeId !== id && !user.roles.some((r) => r === "HR" || r === "ADMIN")) throw forbidden();
   const data = await exportEmployeeData(id);
   await audit(req, { action: "gdpr.exported", entityType: "employee", entityId: id, personalData: true });
-  res.setHeader("Content-Disposition", `attachment; filename="kompass-data-export-${id}.json"`);
+  res.setHeader("Content-Disposition", `attachment; filename="nexora-data-export-${id}.json"`);
   res.json(data);
 });
 

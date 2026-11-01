@@ -4,7 +4,7 @@ import { config } from "../config";
 import type { Role } from "../generated/prisma/client";
 import { forbidden, HttpError } from "../lib/errors";
 
-export const SESSION_COOKIE = "kompass_session";
+export const SESSION_COOKIE = "nexora_session";
 
 export interface SessionUser {
   id: number;
@@ -24,14 +24,14 @@ declare global {
 }
 
 export function signSession(user: SessionUser): string {
-  return jwt.sign(user, config().JWT_SECRET, { expiresIn: `${config().SESSION_HOURS}h`, issuer: "kompass" });
+  return jwt.sign(user, config().JWT_SECRET, { expiresIn: `${config().SESSION_HOURS}h`, issuer: "nexora" });
 }
 
 export function verifySession(token: string | undefined): SessionUser | null {
   if (!token) return null;
   try {
     const { id, username, displayName, roles, employeeId } = jwt.verify(token, config().JWT_SECRET, {
-      issuer: "kompass",
+      issuer: "nexora",
     }) as SessionUser;
     return { id, username, displayName, roles, employeeId };
   } catch {
@@ -67,7 +67,7 @@ export function requireAuth(req: Request, _res: Response, next: NextFunction) {
  */
 export function requireCsrfHeader(req: Request, _res: Response, next: NextFunction) {
   if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return next();
-  if (req.get("X-Kompass-Client") !== "web") throw new HttpError(403, "Missing X-Kompass-Client header");
+  if (req.get("X-Nexora-Client") !== "web") throw new HttpError(403, "Missing X-Nexora-Client header");
   next();
 }
 

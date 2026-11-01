@@ -33,12 +33,12 @@ wait_port() { # name, port
 case "${1:-start}" in
   start)
     [ -n "$PGBIN" ] || { echo "PostgreSQL binaries not found. Install postgresql-16 or set PGBIN."; exit 1; }
-    if [ ! -d "$DATA/pg" ]; then "$PGBIN/initdb" -D "$DATA/pg" -U kompass --auth=trust -E UTF8 >/dev/null; fi
+    if [ ! -d "$DATA/pg" ]; then "$PGBIN/initdb" -D "$DATA/pg" -U nexora --auth=trust -E UTF8 >/dev/null; fi
     if "$PGBIN/pg_ctl" -D "$DATA/pg" status >/dev/null 2>&1; then echo "✓ postgres already running"; else
       "$PGBIN/pg_ctl" -D "$DATA/pg" -o "-p $PGPORT -k /tmp -c listen_addresses=localhost" -l "$DATA/logs/postgres.log" -w start </dev/null >/dev/null 2>&1
       echo "✓ postgres ready on :$PGPORT"
     fi
-    "$PGBIN/createdb" -h localhost -p $PGPORT -U kompass kompass 2>/dev/null || true
+    "$PGBIN/createdb" -h localhost -p $PGPORT -U nexora nexora 2>/dev/null || true
     start_bg mongo node --import tsx src/scripts/dev-mongo.ts
     start_bg ldap node --import tsx src/scripts/dev-ldap.ts
     wait_port mongo 27018

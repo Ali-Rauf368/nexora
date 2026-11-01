@@ -4,14 +4,14 @@ import { api, CSRF, signIn, useDatabases } from "./helpers";
 
 useDatabases();
 
-const login = (username: string, password = "kompass") => api().post("/api/auth/login").set(CSRF).send({ username, password });
+const login = (username: string, password = "nexora") => api().post("/api/auth/login").set(CSRF).send({ username, password });
 
 describe("POST /api/auth/login (Active Directory)", () => {
   it("signs in and maps AD groups to roles", async () => {
     const res = await login("anna.schmidt").expect(200);
     expect(res.body.user).toMatchObject({ username: "anna.schmidt", displayName: "Anna Schmidt", roles: ["ADMIN", "MANAGER", "EMPLOYEE"] });
     expect(res.body.user.employeeId).toEqual(expect.any(Number));
-    expect(res.headers["set-cookie"]?.[0]).toMatch(/kompass_session=.+HttpOnly/);
+    expect(res.headers["set-cookie"]?.[0]).toMatch(/nexora_session=.+HttpOnly/);
   });
 
   it("accepts DOMAIN\\username and any letter case", async () => {
@@ -25,10 +25,10 @@ describe("POST /api/auth/login (Active Directory)", () => {
 
   it.each([
     ["wrong password", "anna.schmidt", "nope"],
-    ["unknown user", "nobody.here", "kompass"],
-    ["disabled account", "max.disabled", "kompass"],
-    ["LDAP filter injection", "*", "kompass"],
-    ["injection attempt", "anna.schmidt)(objectClass=*", "kompass"],
+    ["unknown user", "nobody.here", "nexora"],
+    ["disabled account", "max.disabled", "nexora"],
+    ["LDAP filter injection", "*", "nexora"],
+    ["injection attempt", "anna.schmidt)(objectClass=*", "nexora"],
   ])("rejects %s with a generic message", async (_label, username, password) => {
     const res = await login(username, password).expect(401);
     expect(res.body.error).toBe("Username or password is incorrect");
@@ -51,7 +51,7 @@ describe("POST /api/auth/signup (self-registration)", () => {
   it("creates an EMPLOYEE account, signs in, and allows logging in again", async () => {
     const res = await signup().expect(201);
     expect(res.body.user).toMatchObject({ username: "new.person", roles: ["EMPLOYEE"], employeeId: null });
-    expect(res.headers["set-cookie"]?.[0]).toMatch(/kompass_session=.+HttpOnly/);
+    expect(res.headers["set-cookie"]?.[0]).toMatch(/nexora_session=.+HttpOnly/);
     await login("new.person", "a-long-secret").expect(200);
     expect((await login("new.person", "wrong-password").expect(401)).body.error).toBe("Username or password is incorrect");
   });
@@ -87,17 +87,17 @@ describe("sessions", () => {
   });
 
   it("rejects a tampered session cookie", async () => {
-    await api().get("/api/auth/me").set("Cookie", "kompass_session=eyJhbGciOiJIUzI1NiJ9.e30.forged").expect(401);
+    await api().get("/api/auth/me").set("Cookie", "nexora_session=eyJhbGciOiJIUzI1NiJ9.e30.forged").expect(401);
   });
 
   it("logs out by clearing the cookie", async () => {
     const s = await signIn("lea.fischer");
     const res = await s.post("/api/auth/logout").expect(204);
-    expect(res.headers["set-cookie"]?.[0]).toMatch(/kompass_session=;/);
+    expect(res.headers["set-cookie"]?.[0]).toMatch(/nexora_session=;/);
   });
 
   it("requires the CSRF header on writes", async () => {
-    const res = await api().post("/api/auth/login").send({ username: "anna.schmidt", password: "kompass" }).expect(403);
-    expect(res.body.error).toMatch(/X-Kompass-Client/);
+    const res = await api().post("/api/auth/login").send({ username: "anna.schmidt", password: "nexora" }).expect(403);
+    expect(res.body.error).toMatch(/X-Nexora-Client/);
   });
 });

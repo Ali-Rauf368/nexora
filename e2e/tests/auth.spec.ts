@@ -3,10 +3,10 @@ import { expect, expectAccessible, signIn, test } from "./fixtures";
 test("redirects to the login page and back after signing in", async ({ page }) => {
   await page.goto("/hr/employees");
   await expect(page).toHaveURL(/\/login/);
-  await page.evaluate(() => localStorage.setItem("kompass.lang", "en"));
+  await page.evaluate(() => localStorage.setItem("nexora.lang", "en"));
   await page.reload();
   await page.getByLabel("Username").fill("jonas.weber");
-  await page.getByLabel("Password").fill("kompass");
+  await page.getByLabel("Password").fill("nexora");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/hr\/employees/);
   await expect(page.getByRole("heading", { name: "Employees" })).toBeVisible();
@@ -14,7 +14,7 @@ test("redirects to the login page and back after signing in", async ({ page }) =
 
 test("shows a clear error for wrong credentials", async ({ page }) => {
   await page.goto("/login");
-  await page.evaluate(() => localStorage.setItem("kompass.lang", "en"));
+  await page.evaluate(() => localStorage.setItem("nexora.lang", "en"));
   await page.reload();
   await page.getByLabel("Username").fill("anna.schmidt");
   await page.getByLabel("Password").fill("wrong");
